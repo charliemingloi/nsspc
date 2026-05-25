@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>AgroSmart AI — Intelligent Farm Management</title>
   <link rel="stylesheet" href="/static/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,6 +54,22 @@
       </div>
     </div>
   </aside>
+
+  <!-- Mobile Bottom Navigation (phones only) -->
+  <nav class="mobile-nav" id="mobileNav">
+    <button class="mobile-nav-item active" data-tab="setup" onclick="switchTab('setup')">
+      <span>🌱</span><span>Setup</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="monitor" onclick="switchTab('monitor')">
+      <span>📊</span><span>Monitor</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="chat" onclick="switchTab('chat')">
+      <span>💬</span><span>AgriChat</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="products" onclick="switchTab('products')">
+      <span>🛒</span><span>Products</span>
+    </button>
+  </nav>
 
   <!-- Main Content -->
   <main class="main-content">

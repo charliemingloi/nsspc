@@ -661,7 +661,10 @@ canvas { max-width: 100%; }
 .toast.error { background: var(--danger); }
 @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } }
 
-/* ─── Responsive ─────────────────────────────── */
+/* ─── Mobile Bottom Nav ───────────────────────── */
+.mobile-nav { display: none; }
+
+/* ─── Tablet (≤ 900px) ───────────────────────── */
 @media (max-width: 900px) {
   .monitor-chat-layout { grid-template-columns: 1fr; }
   .products-layout { grid-template-columns: 1fr; }
@@ -672,9 +675,154 @@ canvas { max-width: 100%; }
   .main-content { margin-left: 60px; padding: 16px; }
   .nav-item { align-items: center; padding: 12px; }
 }
-@media (max-width: 600px) {
-  .form-grid { grid-template-columns: 1fr; }
-  .crop-cards { grid-template-columns: 1fr; }
-  .sensor-grid { grid-template-columns: repeat(2, 1fr); }
-  .roi-grid { grid-template-columns: repeat(2, 1fr); }
+
+/* ─── Phone Portrait + Landscape ────────────── */
+@media (max-width: 700px) {
+  /* Hide desktop sidebar, show bottom nav */
+  .sidebar { display: none; }
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--green-900);
+    z-index: 200;
+    height: 58px;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid rgba(255,255,255,.12);
+  }
+  .mobile-nav-item {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    background: none; border: none;
+    color: rgba(255,255,255,.6);
+    font-size: 10px; font-family: inherit;
+    cursor: pointer;
+    padding: 6px 4px;
+    transition: color .15s, background .15s;
+  }
+  .mobile-nav-item span:first-child { font-size: 20px; line-height: 1; }
+  .mobile-nav-item.active { color: var(--green-400); background: rgba(255,255,255,.06); }
+  .mobile-nav-item:hover { color: var(--white); }
+
+  /* Main content fills full width, leave room for bottom nav */
+  .main-content {
+    margin-left: 0;
+    padding: 12px 12px 72px;
+    max-width: 100vw;
+  }
+
+  /* Compact page header */
+  .page-header { margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .page-title { font-size: 18px; }
+  .page-subtitle { font-size: 12px; }
+
+  /* Cards tighter */
+  .card { padding: 14px 14px; border-radius: var(--radius); margin-bottom: 12px; }
+  .card-title { font-size: 14px; margin-bottom: 10px; }
+
+  /* Forms */
+  .form-grid { grid-template-columns: 1fr; gap: 10px; }
+  .form-group input, .form-group select, .form-group textarea { font-size: 16px; } /* prevent iOS zoom */
+
+  /* Score card stack vertically */
+  .score-card { flex-direction: column; text-align: center; }
+  .score-circle { width: 80px; height: 80px; }
+  .score-value { font-size: 24px; }
+
+  /* Crops */
+  .crop-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .crop-card { padding: 10px; }
+
+  /* ROI */
+  .roi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .roi-value { font-size: 14px; }
+
+  /* Sensors */
+  .sensor-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+  .sensor-card { padding: 10px 8px; border-radius: var(--radius); }
+  .sensor-icon { font-size: 18px; margin-bottom: 4px; }
+  .sensor-value { font-size: 16px; }
+  .sensor-label { font-size: 10px; margin-bottom: 6px; }
+
+  /* NPK */
+  .npk-bars { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Charts shorter on phone */
+  .chart-container { height: 150px; }
+
+  /* Monitor layout stacked */
+  .monitor-chat-layout { grid-template-columns: 1fr; }
+
+  /* Chats shorter on phone */
+  .chat-messages { min-height: 160px; max-height: 260px; }
+  .chat-messages.large { min-height: 220px; max-height: 340px; }
+  .bubble-text { font-size: 12px; padding: 8px 10px; }
+
+  /* Agent roster wraps */
+  .agent-roster { gap: 6px; }
+  .agent-card { min-width: 130px; padding: 8px 10px; }
+  .agent-name { font-size: 12px; }
+  .agent-role { font-size: 10px; }
+
+  /* Products layout stacked */
+  .products-layout { grid-template-columns: 1fr; }
+  .product-bot-header { padding-bottom: 10px; margin-bottom: 8px; }
+  .bot-avatar { font-size: 24px; }
+
+  /* Calendar more compact */
+  .calendar-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+  /* Toast lower above nav */
+  .toast { bottom: 70px; right: 12px; left: 12px; max-width: none; }
+
+  /* Loading card compact */
+  .loading-card { padding: 28px 20px; margin: 16px; }
+}
+
+/* ─── Phone Landscape specific ───────────────── */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  /* Bottom nav slimmer in landscape */
+  .mobile-nav { height: 48px; }
+  .mobile-nav-item span:first-child { font-size: 16px; }
+  .mobile-nav-item { font-size: 9px; }
+
+  /* Less vertical padding — height is precious */
+  .main-content { padding: 8px 14px 60px; }
+  .page-header { margin-bottom: 8px; }
+  .card { padding: 10px 14px; margin-bottom: 10px; }
+
+  /* Side-by-side where possible */
+  .sensor-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .sensor-card { padding: 8px 6px; }
+  .sensor-icon { font-size: 16px; margin-bottom: 2px; }
+  .sensor-value { font-size: 14px; }
+
+  /* NPK horizontal in landscape */
+  .npk-bars { grid-template-columns: repeat(3, 1fr); }
+
+  /* Score card horizontal */
+  .score-card { flex-direction: row; text-align: left; }
+  .score-circle { width: 70px; height: 70px; }
+
+  /* Chats very compact in landscape */
+  .chat-messages { min-height: 120px; max-height: 200px; }
+  .chat-messages.large { min-height: 180px; max-height: 280px; }
+
+  /* Monitor side-by-side */
+  .monitor-chat-layout { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Chart shorter */
+  .chart-container { height: 120px; }
+
+  /* Crop cards more columns */
+  .crop-cards { grid-template-columns: repeat(3, 1fr); }
+  .roi-grid { grid-template-columns: repeat(3, 1fr); }
+
+  /* Calendar compact */
+  .calendar-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* Toast stays above nav */
+  .toast { bottom: 58px; }
 }

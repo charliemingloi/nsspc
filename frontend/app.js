@@ -51,9 +51,12 @@ async function checkApiHealth() {
 // ─── Navigation ───────────────────────────────────────
 function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(`tab-${tabName}`).classList.add('active');
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+  document.querySelectorAll(`[data-tab="${tabName}"]`).forEach(el => el.classList.add('active'));
+
+  // Scroll to top on tab switch (mobile)
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (tabName === 'monitor') {
     populateFarmSelects();
