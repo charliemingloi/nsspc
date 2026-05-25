@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroSmart AI — Intelligent Farm Management</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🌾</span>
+      <span class="logo-text">AgroSmart<span class="logo-ai">AI</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="setup" onclick="switchTab('setup')">
+        <span class="nav-icon">🌱</span>
+        <span class="nav-label">Farm Setup</span>
+        <span class="nav-sub">Land Prediction</span>
+      </button>
+      <button class="nav-item" data-tab="monitor" onclick="switchTab('monitor')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Farm Monitor</span>
+        <span class="nav-sub">Live Dashboard</span>
+      </button>
+      <button class="nav-item" data-tab="chat" onclick="switchTab('chat')">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">AgriChat</span>
+        <span class="nav-sub">AI Experts</span>
+      </button>
+      <button class="nav-item" data-tab="products" onclick="switchTab('products')">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-label">Product Bot</span>
+        <span class="nav-sub">Smart Recommendations</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-farm-selector">
+      <div class="selector-label">Active Farm</div>
+      <select id="globalFarmSelect" onchange="onGlobalFarmChange()" class="farm-select">
+        <option value="">No farm selected</option>
+      </select>
+      <button class="btn-link" onclick="switchTab('setup')">+ New Farm</button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="api-status" id="apiStatus">
+        <span class="status-dot"></span>
+        <span class="status-text">Checking...</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ═══════════════ TAB: FARM SETUP ═══════════════ -->
+    <div id="tab-setup" class="tab-content active">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">🌱 Farm Setup & Land Prediction</h1>
+          <p class="page-subtitle">AI-powered analysis of your land for optimal farming setup</p>
+        </div>
+      </div>
+
+      <div class="setup-layout">
+        <!-- Form Panel -->
+        <div class="card setup-form-card">
+          <h2 class="card-title">Land Analysis Input</h2>
+          <p class="card-desc">Fill in your land details and our AI will predict the best farming approach.</p>
+
+          <form id="landForm" onsubmit="submitLandPrediction(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Farm Name *</label>
+                <input type="text" id="farmName" placeholder="e.g. Green Valley Farm" required />
+              </div>
+              <div class="form-group">
+                <label>Location / Region *</label>
+                <input type="text" id="location" placeholder="e.g. Chiang Mai, Thailand" required />
+              </div>
+              <div class="form-group">
+                <label>Land Area (hectares)</label>
+                <input type="text" id="area" placeholder="e.g. 5.5" />
+              </div>
+              <div class="form-group">
+                <label>Soil Type</label>
+                <select id="soilType">
+                  <option value="">Select soil type</option>
+                  <option>Sandy loam</option>
+                  <option>Clay loam</option>
+                  <option>Silty clay</option>
+                  <option>Sandy clay</option>
+                  <option>Loamy sand</option>
+                  <option>Peat/Muck</option>
+                  <option>Red laterite</option>
+                  <option>Black cotton soil</option>
+                  <option>Unknown / Need testing</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Current Soil pH</label>
+                <input type="text" id="soilPh" placeholder="e.g. 6.5 (or Unknown)" />
+              </div>
+              <div class="form-group">
+                <label>Climate Zone</label>
+                <select id="climate">
+                  <option value="">Select climate</option>
+                  <option>Tropical humid</option>
+                  <option>Tropical dry</option>
+                  <option>Subtropical</option>
+                  <option>Mediterranean</option>
+                  <option>Temperate</option>
+                  <option>Semi-arid</option>
+                  <option>Arid/Desert</option>
+                  <option>Highland/Mountain</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Annual Rainfall (mm)</label>
+                <input type="text" id="rainfall" placeholder="e.g. 1200" />
+              </div>
+              <div class="form-group">
+                <label>Water Source</label>
+                <select id="waterSource">
+                  <option value="">Select water source</option>
+                  <option>Well / Borehole</option>
+                  <option>River / Stream</option>
+                  <option>Rainwater only</option>
+                  <option>Municipal / Piped</option>
+                  <option>Canal / Irrigation scheme</option>
+                  <option>Pond / Reservoir</option>
+                  <option>No reliable source</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Topography</label>
+                <select id="topography">
+                  <option>Flat</option>
+                  <option>Gently sloping</option>
+                  <option>Hilly/Terraced</option>
+                  <option>Valley/Low-lying</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Available Budget (USD)</label>
+                <input type="text" id="budget" placeholder="e.g. 10000" />
+              </div>
+              <div class="form-group">
+                <label>Farming Experience</label>
+                <select id="experience">
+                  <option>Beginner (< 2 years)</option>
+                  <option>Intermediate (2-5 years)</option>
+                  <option>Experienced (5-10 years)</option>
+                  <option>Expert (10+ years)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Preferred Crops (optional)</label>
+                <input type="text" id="preferredCrops" placeholder="e.g. rice, vegetables, fruits" />
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Your Goals</label>
+              <textarea id="goals" rows="2" placeholder="e.g. Maximize income, grow organic produce, subsistence farming, export market..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary btn-large" id="predictBtn">
+                <span>🔮 Analyze & Predict</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Results Panel -->
+        <div id="predictionResults" class="prediction-results" style="display:none">
+          <!-- Score Card -->
+          <div class="card score-card">
+            <div class="score-circle" id="scoreCircle">
+              <span class="score-value" id="scoreValue">--</span>
+              <span class="score-label">Suitability</span>
+            </div>
+            <div class="score-info">
+              <h3 id="scoreFarmName">Farm Analysis</h3>
+              <p id="scoreSummary" class="score-summary"></p>
+              <div id="quickWins" class="quick-wins"></div>
+            </div>
+          </div>
+
+          <!-- Recommended Crops -->
+          <div class="card">
+            <h3 class="card-title">🌾 Recommended Crops</h3>
+            <div id="cropCards" class="crop-cards"></div>
+          </div>
+
+          <!-- ROI Analysis -->
+          <div class="card">
+            <h3 class="card-title">💰 ROI Analysis</h3>
+            <div id="roiGrid" class="roi-grid"></div>
+          </div>
+
+          <!-- Soil Amendments -->
+          <div class="card">
+            <h3 class="card-title">🧪 Soil Amendments Needed</h3>
+            <div id="soilAmendments" class="amendments-list"></div>
+          </div>
+
+          <!-- Irrigation -->
+          <div class="card">
+            <h3 class="card-title">💧 Irrigation Recommendation</h3>
+            <div id="irrigationInfo" class="irrigation-box"></div>
+          </div>
+
+          <!-- Risk Factors -->
+          <div class="card">
+            <h3 class="card-title">⚠️ Risk Factors</h3>
+            <div id="riskFactors" class="risk-list"></div>
+          </div>
+
+          <!-- Planting Calendar -->
+          <div class="card">
+            <h3 class="card-title">📅 Planting Calendar</h3>
+            <div id="plantingCalendar" class="calendar-grid"></div>
+          </div>
+
+          <!-- AI Narrative -->
+          <div class="card">
+            <h3 class="card-title">🤖 AI Expert Analysis</h3>
+            <div id="aiNarrative" class="ai-narrative"></div>
+            <button class="btn-secondary" id="getAnalysisBtn" onclick="getAIAnalysis()" style="margin-top:12px">
+              Get Detailed Expert Analysis
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading state for prediction -->
+      <div id="predictionLoading" class="loading-overlay" style="display:none">
+        <div class="loading-card">
+          <div class="spinner"></div>
+          <h3>Analyzing Your Land...</h3>
+          <p id="loadingStep">Processing land characteristics</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TAB: FARM MONITOR ═══════════════ -->
+    <div id="tab-monitor" class="tab-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">📊 Farm Monitor</h1>
+          <p class="page-subtitle">Real-time sensor data, AI analysis, and farm chat</p>
+        </div>
+        <div class="header-actions">
+          <select id="monitorFarmSelect" onchange="loadFarmDashboard()" class="farm-select-inline">
+            <option value="">Select a farm</option>
+          </select>
+          <button class="btn-secondary" onclick="refreshSensorData()">🔄 Refresh</button>
+        </div>
+      </div>
+
+      <div id="monitorNoFarm" class="empty-state">
+        <div class="empty-icon">🚜</div>
+        <h3>No Farm Selected</h3>
+        <p>Create a farm in Farm Setup or select one above to view its dashboard.</p>
+        <button class="btn-primary" onclick="switchTab('setup')">+ Create Farm</button>
+      </div>
+
+      <div id="monitorDashboard" style="display:none">
+        <!-- Sensor Grid -->
+        <div class="sensor-grid" id="sensorGrid">
+          <div class="sensor-card" id="sensor-temp">
+            <div class="sensor-icon">🌡️</div>
+            <div class="sensor-value" id="val-temp">--</div>
+            <div class="sensor-label">Temperature</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-temp"></div></div>
+          </div>
+          <div class="sensor-card" id="sensor-humidity">
+            <div class="sensor-icon">💧</div>
+            <div class="sensor-value" id="val-humidity">--</div>
+            <div class="sensor-label">Humidity</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-humidity"></div></div>
+          </div>
+          <div class="sensor-card" id="sensor-soil">
+            <div class="sensor-icon">🌱</div>
+            <div class="sensor-value" id="val-soil">--</div>
+            <div class="sensor-label">Soil Moisture</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-soil"></div></div>
+          </div>
+          <div class="sensor-card" id="sensor-ph">
+            <div class="sensor-icon">⚗️</div>
+            <div class="sensor-value" id="val-ph">--</div>
+            <div class="sensor-label">Soil pH</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-ph"></div></div>
+          </div>
+          <div class="sensor-card" id="sensor-light">
+            <div class="sensor-icon">☀️</div>
+            <div class="sensor-value" id="val-light">--</div>
+            <div class="sensor-label">Light (lux)</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-light"></div></div>
+          </div>
+          <div class="sensor-card" id="sensor-health">
+            <div class="sensor-icon">💚</div>
+            <div class="sensor-value" id="val-health">--</div>
+            <div class="sensor-label">Plant Health</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill health-bar" id="bar-health"></div></div>
+          </div>
+          <div class="sensor-card" id="sensor-nitrogen">
+            <div class="sensor-icon">🧬</div>
+            <div class="sensor-value" id="val-nitrogen">--</div>
+            <div class="sensor-label">Nitrogen (N)</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-nitrogen"></div></div>
+          </div>
+          <div class="sensor-card" id="sensor-pest">
+            <div class="sensor-icon">🐛</div>
+            <div class="sensor-value" id="val-pest">--</div>
+            <div class="sensor-label">Pest Pressure</div>
+            <div class="sensor-bar"><div class="sensor-bar-fill pest-bar" id="bar-pest"></div></div>
+          </div>
+        </div>
+
+        <!-- NPK Row -->
+        <div class="npk-row card">
+          <h3 class="card-title">🧪 Nutrient Levels</h3>
+          <div class="npk-bars">
+            <div class="npk-item">
+              <div class="npk-label">N — Nitrogen</div>
+              <div class="npk-track"><div class="npk-fill n-fill" id="npk-n"></div></div>
+              <div class="npk-value" id="npk-n-val">--</div>
+            </div>
+            <div class="npk-item">
+              <div class="npk-label">P — Phosphorus</div>
+              <div class="npk-track"><div class="npk-fill p-fill" id="npk-p"></div></div>
+              <div class="npk-value" id="npk-p-val">--</div>
+            </div>
+            <div class="npk-item">
+              <div class="npk-label">K — Potassium</div>
+              <div class="npk-track"><div class="npk-fill k-fill" id="npk-k"></div></div>
+              <div class="npk-value" id="npk-k-val">--</div>
+            </div>
+          </div>
+          <div class="weather-row">
+            <div class="weather-chip">🌬️ Wind: <span id="val-wind">--</span></div>
+            <div class="weather-chip">🌧️ Rain 24h: <span id="val-rain">--</span></div>
+            <div class="weather-chip">🌿 CO₂: <span id="val-co2">--</span></div>
+            <div class="weather-chip">📡 Signal: <span id="val-signal">--</span></div>
+          </div>
+        </div>
+
+        <!-- Trend Chart -->
+        <div class="card">
+          <h3 class="card-title">📈 7-Day Trend</h3>
+          <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- AI Analysis + Chat -->
+        <div class="monitor-chat-layout">
+          <div class="card ai-analysis-card">
+            <h3 class="card-title">🤖 AI Farm Analysis</h3>
+            <div class="observations-input">
+              <textarea id="farmObservations" rows="2" placeholder="Add your observations... (e.g. 'Noticed yellow leaves on tomato plants')"></textarea>
+              <button class="btn-primary" onclick="runFarmAnalysis()">Analyze Farm</button>
+            </div>
+            <div id="farmAnalysisOutput" class="analysis-output"></div>
+          </div>
+
+          <div class="card farm-chat-card">
+            <h3 class="card-title">💬 Ask Your Farm AI</h3>
+            <div class="chat-messages" id="farmChatMessages">
+              <div class="chat-bubble assistant-bubble">
+                <div class="bubble-avatar">🤖</div>
+                <div class="bubble-text">Hi! I'm monitoring your farm in real-time. Ask me anything about the current conditions, sensor readings, or what action to take!</div>
+              </div>
+            </div>
+            <div class="chat-input-row">
+              <input type="text" id="farmChatInput" placeholder="Ask about your farm..." onkeydown="if(event.key==='Enter') sendFarmChat()" />
+              <button class="btn-send" onclick="sendFarmChat()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TAB: AGRI CHAT ═══════════════ -->
+    <div id="tab-chat" class="tab-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">💬 AgriChat — AI Expert Team</h1>
+          <p class="page-subtitle">Talk to a team of specialized agricultural AI experts</p>
+        </div>
+        <button class="btn-secondary" onclick="clearAgriChat()">🗑️ Clear Chat</button>
+      </div>
+
+      <!-- Agent Cards -->
+      <div class="agent-roster" id="agentRoster">
+        <!-- Filled by JS -->
+      </div>
+
+      <!-- Chat Area -->
+      <div class="agri-chat-layout">
+        <div class="card agri-chat-card">
+          <div class="chat-messages large" id="agriChatMessages">
+            <div class="chat-bubble assistant-bubble agri-welcome">
+              <div class="bubble-avatar">🌾</div>
+              <div class="bubble-text">
+                <strong>Welcome to AgriChat!</strong> Our team of AI specialists is ready to help.<br><br>
+                Ask about soil health, crop diseases, weather planning, market prices, irrigation systems, or anything else farming-related!
+                <div class="suggestion-chips">
+                  <button class="chip" onclick="sendAgriMessage('My tomato leaves are turning yellow with brown spots. What disease is this?')">Tomato leaf disease</button>
+                  <button class="chip" onclick="sendAgriMessage('What is the best soil pH for growing rice and how do I adjust it?')">Rice soil pH</button>
+                  <button class="chip" onclick="sendAgriMessage('How do I set up drip irrigation for 2 hectares of vegetables?')">Drip irrigation setup</button>
+                  <button class="chip" onclick="sendAgriMessage('When is the best time to sell my corn harvest to maximize profit?')">Best time to sell corn</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" id="agriChatInput" placeholder="Ask any farming question..." onkeydown="if(event.key==='Enter') sendAgriChat()" />
+            <button class="btn-send" onclick="sendAgriChat()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TAB: PRODUCT BOT ═══════════════ -->
+    <div id="tab-products" class="tab-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">🛒 AgriBot — Product Advisor</h1>
+          <p class="page-subtitle">AI-powered farming product recommendations tailored to your needs</p>
+        </div>
+        <button class="btn-secondary" onclick="clearProductChat()">🗑️ Clear Chat</button>
+      </div>
+
+      <div class="products-layout">
+        <!-- Product Catalog Sidebar -->
+        <div class="catalog-sidebar">
+          <div class="card">
+            <h3 class="card-title">📦 Product Catalog</h3>
+            <div id="catalogSummary" class="catalog-summary">
+              <div class="catalog-loading">Loading catalog...</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">🔥 Quick Searches</h3>
+            <div class="quick-searches">
+              <button class="search-chip" onclick="sendProductMessage('I need fertilizer recommendations for growing vegetables')">Vegetable fertilizers</button>
+              <button class="search-chip" onclick="sendProductMessage('What seeds should I buy for a tropical climate farm?')">Tropical seeds</button>
+              <button class="search-chip" onclick="sendProductMessage('I have aphids on my crops. What organic pesticide should I use?')">Organic pest control</button>
+              <button class="search-chip" onclick="sendProductMessage('I want to set up drip irrigation for 1 hectare. What do I need?')">Drip irrigation kit</button>
+              <button class="search-chip" onclick="sendProductMessage('My soil pH is 7.8, too alkaline. What products can lower it?')">pH correction</button>
+              <button class="search-chip" onclick="sendProductMessage('Recommend monitoring equipment for my farm under $200')">Farm sensors</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="card product-chat-card">
+          <div class="product-bot-header">
+            <div class="bot-avatar">🤖</div>
+            <div>
+              <div class="bot-name">AgriBot</div>
+              <div class="bot-title">Product Advisor • AgroSmart Supply</div>
+            </div>
+            <div class="bot-badge online">● Online</div>
+          </div>
+          <div class="chat-messages large" id="productChatMessages">
+            <div class="chat-bubble assistant-bubble">
+              <div class="bubble-avatar">🤖</div>
+              <div class="bubble-text">
+                Hi! I'm AgriBot, your smart farming product advisor. 🌾<br><br>
+                I have access to our full catalog of <strong>seeds, fertilizers, pesticides, irrigation systems, soil amendments,</strong> and <strong>farm equipment</strong>.<br><br>
+                Tell me what you need or describe your farming challenge, and I'll find the best products for you!
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" id="productChatInput" placeholder="What products do you need?" onkeydown="if(event.key==='Enter') sendProductChat()" />
+            <button class="btn-send" onclick="sendProductChat()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

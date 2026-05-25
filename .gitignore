@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+backend/data/farms.json
+*.egg-info/
+.venv/
+dist/
