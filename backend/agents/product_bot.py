@@ -1,6 +1,6 @@
-import anthropic
 import json
 from typing import AsyncIterator
+from openai import AsyncOpenAI
 
 PRODUCT_CATALOG = {
     "seeds": [
@@ -16,17 +16,17 @@ PRODUCT_CATALOG = {
         {"id": "F001", "name": "Complete NPK 15-15-15 Granular", "brand": "NutriGrow", "price_usd": 35.00, "unit": "per 25 kg bag", "category": "fertilizers", "subcategory": "synthetic", "features": ["Balanced nutrition", "Slow release coating", "pH neutral", "All crops"], "rating": 4.7, "in_stock": True},
         {"id": "F002", "name": "Organic Fish & Seaweed Liquid", "brand": "OceanGrow", "price_usd": 28.50, "unit": "per 5L concentrate", "category": "fertilizers", "subcategory": "organic", "features": ["OMRI listed organic", "Natural growth stimulant", "Improves soil biology", "Foliar or soil drench"], "rating": 4.8, "in_stock": True},
         {"id": "F003", "name": "Urea 46% Nitrogen", "brand": "NitroFarm", "price_usd": 22.00, "unit": "per 25 kg", "category": "fertilizers", "subcategory": "nitrogen", "features": ["46% N content", "Fast acting", "Cost effective", "Leafy crop boost"], "rating": 4.5, "in_stock": True},
-        {"id": "F004", "name": "Superphosphate 0-46-0", "brand": "PhosAgri", "price_usd": 30.00, "unit": "per 25 kg", "category": "fertilizers", "subcategory": "phosphorus", "features": ["High P for root development", "Water soluble", "Promotes flowering", "pH adjustable"], "rating": 4.6, "in_stock": True},
+        {"id": "F004", "name": "Superphosphate 0-46-0", "brand": "PhosAgri", "price_usd": 30.00, "unit": "per 25 kg", "category": "fertilizers", "subcategory": "phosphorus", "features": ["High P for root development", "Water soluble", "Promotes flowering"], "rating": 4.6, "in_stock": True},
         {"id": "F005", "name": "Vermicompost Premium Grade", "brand": "EarthCycle", "price_usd": 18.00, "unit": "per 20 kg", "category": "fertilizers", "subcategory": "organic", "features": ["Worm castings", "Full microbiome", "Slow release 6 months", "pH neutral"], "rating": 4.9, "in_stock": True},
         {"id": "F006", "name": "Potassium Sulfate 0-0-50", "brand": "KaliGrow", "price_usd": 40.00, "unit": "per 25 kg", "category": "fertilizers", "subcategory": "potassium", "features": ["50% K2O", "Low chloride", "Fruit & root crops", "Improves quality"], "rating": 4.7, "in_stock": True},
-        {"id": "F007", "name": "Calcium Nitrate - Foliar Grade", "brand": "CalciMax", "price_usd": 32.00, "unit": "per 25 kg", "category": "fertilizers", "subcategory": "secondary nutrients", "features": ["Prevents blossom end rot", "Fast uptake", "Strengthens cell walls", "Tomato & pepper specialist"], "rating": 4.8, "in_stock": True}
+        {"id": "F007", "name": "Calcium Nitrate - Foliar Grade", "brand": "CalciMax", "price_usd": 32.00, "unit": "per 25 kg", "category": "fertilizers", "subcategory": "secondary nutrients", "features": ["Prevents blossom end rot", "Fast uptake", "Strengthens cell walls"], "rating": 4.8, "in_stock": True}
     ],
     "pesticides": [
         {"id": "P001", "name": "Neem Oil Concentrate - Organic", "brand": "GreenShield", "price_usd": 22.00, "unit": "per 500ml", "category": "pesticides", "subcategory": "organic insecticide", "features": ["OMRI organic certified", "Controls 200+ pests", "Fungicide + insecticide", "Safe for beneficials"], "rating": 4.7, "in_stock": True},
         {"id": "P002", "name": "Bacillus thuringiensis (Bt) Spray", "brand": "BioDefend", "price_usd": 35.00, "unit": "per 1L", "category": "pesticides", "subcategory": "biological", "features": ["Caterpillar specific", "Organic approved", "Safe for bees", "Rain-fast formula"], "rating": 4.6, "in_stock": True},
-        {"id": "P003", "name": "Copper Fungicide Wettable Powder", "brand": "FungoClear", "price_usd": 28.00, "unit": "per 500g", "category": "pesticides", "subcategory": "fungicide", "features": ["Broad spectrum fungicide", "Controls blight/mildew", "Multi-crop approved", "Protective & curative"], "rating": 4.5, "in_stock": True},
+        {"id": "P003", "name": "Copper Fungicide Wettable Powder", "brand": "FungoClear", "price_usd": 28.00, "unit": "per 500g", "category": "pesticides", "subcategory": "fungicide", "features": ["Broad spectrum", "Controls blight/mildew", "Multi-crop approved"], "rating": 4.5, "in_stock": True},
         {"id": "P004", "name": "Diatomaceous Earth - Food Grade", "brand": "EarthGuard", "price_usd": 16.50, "unit": "per 2 kg", "category": "pesticides", "subcategory": "mechanical", "features": ["100% non-toxic", "Kills crawling insects", "Safe for humans & pets", "Long lasting"], "rating": 4.8, "in_stock": True},
-        {"id": "P005", "name": "Glyphosate 41% - Weed Control", "brand": "WeedAway Pro", "price_usd": 45.00, "unit": "per 5L", "category": "pesticides", "subcategory": "herbicide", "features": ["Non-selective herbicide", "Pre-planting use", "7-day re-entry", "Cost effective"], "rating": 4.3, "in_stock": True}
+        {"id": "P005", "name": "Glyphosate 41% - Weed Control", "brand": "WeedAway Pro", "price_usd": 45.00, "unit": "per 5L", "category": "pesticides", "subcategory": "herbicide", "features": ["Non-selective herbicide", "Pre-planting use", "7-day re-entry"], "rating": 4.3, "in_stock": True}
     ],
     "irrigation": [
         {"id": "I001", "name": "Drip Irrigation Kit - 100 Plants", "brand": "AquaPrecise", "price_usd": 89.00, "unit": "complete kit", "category": "irrigation", "subcategory": "drip system", "features": ["90% water efficiency", "Timer included", "Expandable", "Pressure regulated"], "rating": 4.8, "in_stock": True},
@@ -36,7 +36,7 @@ PRODUCT_CATALOG = {
     ],
     "soil_amendments": [
         {"id": "A001", "name": "Agricultural Lime - Calcite", "brand": "SoilBalance", "price_usd": 15.00, "unit": "per 25 kg", "category": "soil_amendments", "subcategory": "pH adjuster", "features": ["Raises soil pH", "Adds calcium", "Improves structure", "Long lasting"], "rating": 4.6, "in_stock": True},
-        {"id": "A002", "name": "Sulfur Granular - pH Lowering", "brand": "AcidFarm", "price_usd": 18.00, "unit": "per 10 kg", "category": "soil_amendments", "subcategory": "pH adjuster", "features": ["Lowers soil pH", "Elemental sulfur", "Slow acting 6-8 weeks", "Blueberry specialist"], "rating": 4.5, "in_stock": True},
+        {"id": "A002", "name": "Sulfur Granular - pH Lowering", "brand": "AcidFarm", "price_usd": 18.00, "unit": "per 10 kg", "category": "soil_amendments", "subcategory": "pH adjuster", "features": ["Lowers soil pH", "Elemental sulfur", "Slow acting 6-8 weeks"], "rating": 4.5, "in_stock": True},
         {"id": "A003", "name": "Biochar Premium - Activated", "brand": "CarbonFarm", "price_usd": 42.00, "unit": "per 10 kg", "category": "soil_amendments", "subcategory": "organic matter", "features": ["Permanent carbon storage", "Improves water retention", "Nutrient retention", "Microbiome habitat"], "rating": 4.9, "in_stock": True},
         {"id": "A004", "name": "Mycorrhizal Inoculant - Root Builder", "brand": "MycoForce", "price_usd": 35.00, "unit": "per 500g", "category": "soil_amendments", "subcategory": "biological", "features": ["14 species blend", "Extends root network", "Drought resistance", "Nutrient uptake boost"], "rating": 4.8, "in_stock": True},
         {"id": "A005", "name": "Perlite Horticultural Grade", "brand": "LightGrow", "price_usd": 24.00, "unit": "per 20L bag", "category": "soil_amendments", "subcategory": "structure", "features": ["Improves drainage", "Aerates soil", "pH neutral", "Reusable"], "rating": 4.7, "in_stock": True}
@@ -53,138 +53,117 @@ PRODUCT_CATALOG = {
 PRODUCT_BOT_SYSTEM = """You are AgriBot, an expert AI product advisor for AgroSmart Farming Supply.
 You help farmers find the right products for their specific needs, farm conditions, and budget.
 
-You have access to a comprehensive product catalog covering:
-- Seeds (vegetables, grains, fruits, legumes)
-- Fertilizers (organic, synthetic, specialty nutrients)
-- Pest & Disease Control (organic, biological, conventional)
-- Irrigation Systems & Automation
-- Soil Amendments & Conditioners
-- Farm Equipment & Monitoring Tools
+You have access to a catalog covering seeds, fertilizers, pest control, irrigation, soil amendments, and equipment.
 
 Your approach:
-1. Understand the farmer's specific situation and challenges
-2. Recommend the most suitable products with clear reasoning
-3. Prioritize organic/biological options when appropriate
-4. Consider budget constraints
+1. Understand the farmer's specific situation
+2. Use the search_products function to find relevant items
+3. Recommend the most suitable products with clear reasoning
+4. Prioritize organic/biological options when appropriate
 5. Explain HOW to use recommended products
-6. Warn about any incompatibilities or precautions
-7. Suggest complementary products that work well together
+6. Suggest complementary products
 
-Be friendly, knowledgeable, and help farmers make confident buying decisions.
-Always sign as "- AgriBot 🤖" """
-
+Be friendly and help farmers make confident buying decisions.
+Sign as "- AgriBot 🤖" """
 
 SEARCH_TOOL = {
-    "name": "search_products",
-    "description": "Search the product catalog for relevant farming products",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "categories": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "Product categories to search: seeds, fertilizers, pesticides, irrigation, soil_amendments, equipment"
+    "type": "function",
+    "function": {
+        "name": "search_products",
+        "description": "Search the farming product catalog",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Categories: seeds, fertilizers, pesticides, irrigation, soil_amendments, equipment"
+                },
+                "crop": {"type": "string", "description": "Specific crop if applicable"},
+                "keywords": {"type": "array", "items": {"type": "string"}, "description": "Keywords to match"},
+                "max_price": {"type": "number", "description": "Maximum price in USD"},
+                "organic_only": {"type": "boolean", "description": "Only organic products"}
             },
-            "crop": {"type": "string", "description": "Specific crop if applicable"},
-            "keywords": {"type": "array", "items": {"type": "string"}, "description": "Keywords to match"},
-            "max_price": {"type": "number", "description": "Maximum price per unit in USD"},
-            "organic_only": {"type": "boolean", "description": "Only return organic certified products"}
-        },
-        "required": ["categories"]
+            "required": ["categories"]
+        }
     }
 }
 
 
 def search_products(categories: list, crop: str = None, keywords: list = None, max_price: float = None, organic_only: bool = False) -> list:
     results = []
-
     for category in categories:
         if category in PRODUCT_CATALOG:
             for product in PRODUCT_CATALOG[category]:
-                # Filter by crop
                 if crop and "crop" in product and product["crop"].lower() != crop.lower():
                     continue
-
-                # Filter by price
                 if max_price and product["price_usd"] > max_price:
                     continue
-
-                # Filter organic
                 if organic_only and "organic" not in product.get("subcategory", "").lower() and \
                    not any("organic" in f.lower() or "omri" in f.lower() for f in product.get("features", [])):
                     continue
-
-                # Filter by keywords
                 if keywords:
                     text = f"{product['name']} {product.get('subcategory', '')} {' '.join(product.get('features', []))}".lower()
                     if not any(kw.lower() in text for kw in keywords):
                         continue
-
                 results.append(product)
-
     return results
 
 
 async def product_bot_chat(
-    client: anthropic.Anthropic,
+    client: AsyncOpenAI,
     conversation_history: list,
     user_message: str,
     farm_profile: dict = None
 ) -> AsyncIterator[str]:
-    """Stream product bot response with tool use for catalog search."""
-
     farm_context = ""
     if farm_profile:
-        farm_context = f"\nFarmer's profile: Growing {farm_profile.get('crops', 'various crops')}, {farm_profile.get('area', 'unknown')} hectares, {farm_profile.get('experience', 'beginner')} experience level."
+        farm_context = f"\nFarmer profile: growing {farm_profile.get('crops', 'various')}, {farm_profile.get('area', 'unknown')} ha, {farm_profile.get('experience', 'beginner')} experience."
 
-    messages = conversation_history + [{"role": "user", "content": user_message}]
+    system = PRODUCT_BOT_SYSTEM + farm_context
+    messages = [{"role": "system", "content": system}] + conversation_history + [{"role": "user", "content": user_message}]
 
-    # First call - may use tool
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
+    # First call — may use tool
+    response = await client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=2000,
-        system=[{"type": "text", "text": PRODUCT_BOT_SYSTEM + farm_context, "cache_control": {"type": "ephemeral"}}],
         tools=[SEARCH_TOOL],
         messages=messages
     )
 
-    # Handle tool use
-    if response.stop_reason == "tool_use":
-        tool_results = []
-        assistant_message = {"role": "assistant", "content": response.content}
+    if response.choices[0].finish_reason == "tool_calls":
+        tool_call = response.choices[0].message.tool_calls[0]
+        args = json.loads(tool_call.function.arguments)
+        search_results = search_products(**args)
 
-        for block in response.content:
-            if block.type == "tool_use" and block.name == "search_products":
-                search_results = search_products(**block.input)
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": block.id,
-                    "content": json.dumps(search_results)
-                })
-
-        # Continue with tool results using streaming
-        messages_with_tools = messages + [
-            assistant_message,
-            {"role": "user", "content": tool_results}
+        # Build continuation messages with tool result
+        messages_with_tool = messages + [
+            response.choices[0].message,  # assistant message with tool_calls
+            {
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": json.dumps(search_results)
+            }
         ]
 
-        with client.messages.stream(
-            model="claude-sonnet-4-6",
+        stream = await client.chat.completions.create(
+            model="gpt-4o",
             max_tokens=2000,
-            system=[{"type": "text", "text": PRODUCT_BOT_SYSTEM + farm_context, "cache_control": {"type": "ephemeral"}}],
-            messages=messages_with_tools
-        ) as stream:
-            for text in stream.text_stream:
-                yield text
+            stream=True,
+            messages=messages_with_tool
+        )
+
+        async for chunk in stream:
+            content = chunk.choices[0].delta.content
+            if content:
+                yield content
     else:
-        # Direct response without tool use
-        for block in response.content:
-            if hasattr(block, 'text'):
-                yield block.text
+        # Direct response
+        content = response.choices[0].message.content or ""
+        yield content
 
 
 def get_catalog_summary() -> dict:
-    """Return a summary of the product catalog for the frontend."""
     return {
         cat: {
             "count": len(products),

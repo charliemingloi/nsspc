@@ -1,6 +1,6 @@
-import anthropic
 import json
 from typing import AsyncIterator
+from openai import AsyncOpenAI
 
 SYSTEM_PROMPT = """You are an expert agricultural land analyst and farm planning consultant with 30+ years of experience.
 Your role is to analyze land characteristics provided by farmers and generate comprehensive, data-driven farm setup predictions.
@@ -26,100 +26,103 @@ Always provide:
 Be specific, practical, and optimistic but realistic. Format your response with clear sections."""
 
 PREDICTION_TOOL = {
-    "name": "generate_farm_prediction",
-    "description": "Generate a structured farm prediction report based on land analysis",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "overall_suitability_score": {
-                "type": "number",
-                "description": "Overall land suitability score 0-100"
-            },
-            "recommended_crops": {
-                "type": "array",
-                "items": {
+    "type": "function",
+    "function": {
+        "name": "generate_farm_prediction",
+        "description": "Generate a structured farm prediction report based on land analysis",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "overall_suitability_score": {
+                    "type": "number",
+                    "description": "Overall land suitability score 0-100"
+                },
+                "recommended_crops": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "confidence": {"type": "number"},
+                            "yield_per_hectare": {"type": "string"},
+                            "annual_revenue_estimate": {"type": "string"},
+                            "growing_season_months": {"type": "number"},
+                            "difficulty": {"type": "string", "enum": ["Easy", "Moderate", "Advanced"]}
+                        },
+                        "required": ["name", "confidence", "yield_per_hectare", "annual_revenue_estimate", "growing_season_months", "difficulty"]
+                    }
+                },
+                "soil_amendments": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "amendment": {"type": "string"},
+                            "quantity": {"type": "string"},
+                            "estimated_cost": {"type": "string"},
+                            "priority": {"type": "string", "enum": ["Critical", "High", "Medium", "Low"]}
+                        }
+                    }
+                },
+                "irrigation_recommendation": {
                     "type": "object",
                     "properties": {
-                        "name": {"type": "string"},
-                        "confidence": {"type": "number"},
-                        "yield_per_hectare": {"type": "string"},
-                        "annual_revenue_estimate": {"type": "string"},
-                        "growing_season_months": {"type": "number"},
-                        "difficulty": {"type": "string", "enum": ["Easy", "Moderate", "Advanced"]}
-                    },
-                    "required": ["name", "confidence", "yield_per_hectare", "annual_revenue_estimate", "growing_season_months", "difficulty"]
-                }
-            },
-            "soil_amendments": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "amendment": {"type": "string"},
-                        "quantity": {"type": "string"},
+                        "system_type": {"type": "string"},
                         "estimated_cost": {"type": "string"},
-                        "priority": {"type": "string", "enum": ["Critical", "High", "Medium", "Low"]}
+                        "water_requirement_daily": {"type": "string"},
+                        "efficiency_rating": {"type": "string"}
                     }
-                }
-            },
-            "irrigation_recommendation": {
-                "type": "object",
-                "properties": {
-                    "system_type": {"type": "string"},
-                    "estimated_cost": {"type": "string"},
-                    "water_requirement_daily": {"type": "string"},
-                    "efficiency_rating": {"type": "string"}
-                }
-            },
-            "roi_analysis": {
-                "type": "object",
-                "properties": {
-                    "initial_investment": {"type": "string"},
-                    "monthly_operating_cost": {"type": "string"},
-                    "expected_monthly_revenue": {"type": "string"},
-                    "payback_period_months": {"type": "number"},
-                    "year1_roi_percent": {"type": "number"},
-                    "year3_roi_percent": {"type": "number"}
-                }
-            },
-            "risk_factors": {
-                "type": "array",
-                "items": {
+                },
+                "roi_analysis": {
                     "type": "object",
                     "properties": {
-                        "risk": {"type": "string"},
-                        "severity": {"type": "string", "enum": ["High", "Medium", "Low"]},
-                        "mitigation": {"type": "string"}
+                        "initial_investment": {"type": "string"},
+                        "monthly_operating_cost": {"type": "string"},
+                        "expected_monthly_revenue": {"type": "string"},
+                        "payback_period_months": {"type": "number"},
+                        "year1_roi_percent": {"type": "number"},
+                        "year3_roi_percent": {"type": "number"}
                     }
+                },
+                "risk_factors": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "risk": {"type": "string"},
+                            "severity": {"type": "string", "enum": ["High", "Medium", "Low"]},
+                            "mitigation": {"type": "string"}
+                        }
+                    }
+                },
+                "planting_calendar": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "month": {"type": "string"},
+                            "activities": {"type": "array", "items": {"type": "string"}}
+                        }
+                    }
+                },
+                "summary": {"type": "string"},
+                "quick_wins": {
+                    "type": "array",
+                    "items": {"type": "string"}
                 }
             },
-            "planting_calendar": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "month": {"type": "string"},
-                        "activities": {"type": "array", "items": {"type": "string"}}
-                    }
-                }
-            },
-            "summary": {"type": "string"},
-            "quick_wins": {
-                "type": "array",
-                "items": {"type": "string"}
-            }
-        },
-        "required": [
-            "overall_suitability_score", "recommended_crops", "soil_amendments",
-            "irrigation_recommendation", "roi_analysis", "risk_factors",
-            "planting_calendar", "summary", "quick_wins"
-        ]
+            "required": [
+                "overall_suitability_score", "recommended_crops", "soil_amendments",
+                "irrigation_recommendation", "roi_analysis", "risk_factors",
+                "planting_calendar", "summary", "quick_wins"
+            ]
+        }
     }
 }
 
 
-async def predict_land(client: anthropic.Anthropic, land_data: dict) -> dict:
-    user_message = f"""Please analyze this land and provide a comprehensive farm setup prediction:
+def _build_land_message(land_data: dict) -> str:
+    return f"""Please analyze this land and provide a comprehensive farm setup prediction:
 
 **Land Details:**
 - Location/Region: {land_data.get('location', 'Not specified')}
@@ -136,32 +139,27 @@ async def predict_land(client: anthropic.Anthropic, land_data: dict) -> dict:
 - Preferred Crops: {land_data.get('preferred_crops', 'Open to suggestions')}
 - Goals: {land_data.get('goals', 'General farming')}
 
-Generate a full prediction using the generate_farm_prediction tool."""
+Generate a full prediction using the generate_farm_prediction function."""
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
+
+async def predict_land(client: AsyncOpenAI, land_data: dict) -> dict:
+    response = await client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=4096,
-        system=[
-            {
-                "type": "text",
-                "text": SYSTEM_PROMPT,
-                "cache_control": {"type": "ephemeral"}
-            }
-        ],
         tools=[PREDICTION_TOOL],
-        tool_choice={"type": "tool", "name": "generate_farm_prediction"},
-        messages=[{"role": "user", "content": user_message}]
+        tool_choice={"type": "function", "function": {"name": "generate_farm_prediction"}},
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": _build_land_message(land_data)}
+        ]
     )
 
-    for block in response.content:
-        if block.type == "tool_use" and block.name == "generate_farm_prediction":
-            return block.input
-
-    return {"error": "Failed to generate prediction"}
+    tool_call = response.choices[0].message.tool_calls[0]
+    return json.loads(tool_call.function.arguments)
 
 
-async def stream_land_analysis(client: anthropic.Anthropic, land_data: dict) -> AsyncIterator[str]:
-    user_message = f"""Provide a detailed narrative analysis of this farm land and give expert advice on the best approach:
+async def stream_land_analysis(client: AsyncOpenAI, land_data: dict) -> AsyncIterator[str]:
+    user_message = f"""Provide a detailed narrative analysis of this farm land:
 
 Location: {land_data.get('location', 'Not specified')}
 Area: {land_data.get('area', 'Not specified')} hectares
@@ -174,11 +172,17 @@ Goals: {land_data.get('goals', 'General profitable farming')}
 
 Provide an expert, encouraging, and practical analysis."""
 
-    with client.messages.stream(
-        model="claude-sonnet-4-6",
+    stream = await client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=1024,
-        system=[{"type": "text", "text": SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}}],
-        messages=[{"role": "user", "content": user_message}]
-    ) as stream:
-        for text in stream.text_stream:
-            yield text
+        stream=True,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
+    )
+
+    async for chunk in stream:
+        content = chunk.choices[0].delta.content
+        if content:
+            yield content

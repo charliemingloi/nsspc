@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 from contextlib import asynccontextmanager
 
-import anthropic
+from openai import AsyncOpenAI
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -36,11 +36,11 @@ def save_farms(data: dict):
         json.dump(data, f, indent=2)
 
 
-def get_client() -> anthropic.Anthropic:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+def get_client() -> AsyncOpenAI:
+    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
-    return anthropic.Anthropic(api_key=api_key)
+        raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
+    return AsyncOpenAI(api_key=api_key)
 
 
 app = FastAPI(title="AgroSmart AI Platform", version="1.0.0")
@@ -101,7 +101,7 @@ class ObservationRequest(BaseModel):
 
 @app.get("/api/health")
 async def health():
-    key_set = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    key_set = bool(os.environ.get("OPENAI_API_KEY"))
     return {"status": "ok", "api_key_configured": key_set}
 
 

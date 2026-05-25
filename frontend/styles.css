@@ -52,6 +52,8 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { overflow-x: hidden; }
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--gray-50);
@@ -60,6 +62,7 @@ body {
   min-height: 100vh;
   font-size: 14px;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 /* ─── Sidebar ─────────────────────────────────────── */
@@ -774,11 +777,52 @@ canvas { max-width: 100%; }
   /* Calendar more compact */
   .calendar-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
 
-  /* Toast lower above nav */
+  /* Toast above bottom nav */
   .toast { bottom: 70px; right: 12px; left: 12px; max-width: none; }
 
   /* Loading card compact */
   .loading-card { padding: 28px 20px; margin: 16px; }
+
+  /* Header actions stack on phone */
+  .header-actions { flex-direction: column; align-items: stretch; width: 100%; }
+  .farm-select-inline { width: 100%; }
+
+  /* Monitor observations stack vertically */
+  .observations-input { flex-direction: column; }
+  .observations-input textarea { width: 100%; }
+  .observations-input .btn-primary { width: 100%; justify-content: center; }
+
+  /* Full-width predict button */
+  .form-actions { justify-content: stretch; }
+  .btn-primary.btn-large { width: 100%; justify-content: center; }
+
+  /* Suggestion chips: horizontal scroll */
+  .suggestion-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .suggestion-chips::-webkit-scrollbar { display: none; }
+  .chip { white-space: nowrap; flex-shrink: 0; }
+
+  /* Quick wins wrap nicely */
+  .quick-wins { flex-wrap: wrap; }
+
+  /* Touch-friendly tap targets */
+  .btn-primary, .btn-secondary { min-height: 44px; }
+  .btn-send { min-height: 44px; min-width: 44px; }
+  .mobile-nav-item { min-height: 48px; }
+
+  /* Irrigation grid 2-col */
+  .irrigation-box { grid-template-columns: 1fr 1fr; }
+
+  /* Amendments simpler on small screen */
+  .amendment-row { flex-wrap: wrap; gap: 6px; }
+
+  /* Risk rows readable */
+  .risk-header { flex-wrap: wrap; gap: 4px; }
 }
 
 /* ─── Phone Landscape specific ───────────────── */
